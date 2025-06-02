@@ -11,9 +11,11 @@ sensorDirNalinha = False;
 
 contador = 0
 
+HISTERESE = 5
+
 PORTA_SENSOR_ESQ = port.A
 PORTA_SENSOR_DIR = port.B
-PORTA_SENSOR_CRUZAMENTO = port.E
+PORTA_SENSOR_CRUZAMENTO = port.F
 
 TEMPO_ENTRE_CRUZ = 1000
 
@@ -24,9 +26,9 @@ NUM_CRUZ = 4
 
 TEMPO_PARAR = 1000
 
-LIMIAR = 50
+LIMIAR = 40
 
-VELOCIDADE = 400
+VELOCIDADE = 200
 VELOCIDADE_CURVA = VELOCIDADE
 
 TICTAC_TIME = 400
@@ -71,7 +73,7 @@ def parar():
     motor.run(PORTA_MOTOR_ESQ, 0)
 
 def estouNaLinha(porta):
-    if color_sensor.reflection(porta) < LIMIAR:
+    if color_sensor.reflection(porta) < LIMIAR + HISTERESE:
         return False
     return True
 
@@ -85,7 +87,6 @@ def atualizarSensores():
 def seguirLinha():
     global estavaParaFrente
     global velocidadeFrente
-    global ultimaAtt
     if not sensorEsqNaLinha and not sensorDirNaLinha:
         frente(VELOCIDADE)
         # ligarMotorGrande()
@@ -99,22 +100,22 @@ def seguirLinha():
         #ligarMotorGrande()
         estavaParaFrente = False
     else:
-        pass
+        frente(VELOCIDADE)
+        estavaParaFrente = True
 
     #incrementa a velocidade gradualmente
-    agora = time.ticks_ms()
-
-    if agora >= (ultimaAtt + TICTAC_TIME):
-        ultimaAtt = agora
-        if estavaParaFrente:
-            velocidadeFrente+=50
-            if velocidadeFrente > 1110:
-                velocidadeFrente = 1110
-        else:
-            velocidadeFrente = VELOCIDADE
+    # agora = time.ticks_ms()
+    # ultimaAtt = agora
+    # if agora >= (ultimaAtt + TICTAC_TIME):
+    #     ultimaAtt = agora
+    #     if estavaParaFrente:
+    #         velocidadeFrente+=50
+    #         if velocidadeFrente > 1110:
+    #             velocidadeFrente = 1110
+    #     else:
+    #         velocidadeFrente = VELOCIDADE
 
 async def main():
-    global ultimaAtt
     global contador
     ultimaAtt = time.ticks_ms()
     ultimaAttCruz = time.ticks_ms()
@@ -126,7 +127,7 @@ async def main():
         atualizarSensores()
         seguirLinha()
         agora = time.ticks_ms()
-        if estouNaLinha(port.E):
+        if estouNaLinha(PORTA_SENSOR_CRUZAMENTO):
             cont_cruzamento += 1
             if cont_cruzamento > 3:
                 if agora >(ultimaAttCruz + TEMPO_ENTRE_CRUZ):
@@ -139,8 +140,8 @@ async def main():
     ultimaAtt = agora
     while agora < ultimaAtt + TEMPO_PARAR:
         agora = time.ticks_ms()
-        frente(VELOCIDADE)
+        atualizarSensores()
+        seguirLinha()
+    parar()
 
 runloop.run(main())
-
-
