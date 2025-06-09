@@ -124,7 +124,7 @@ async def main():
     while True:
         if force_sensor.pressed(port.E):
             contador = 0
-            while contador < NUM_CRUZ or force_sensor.pressed(port.E):
+            while contador < NUM_CRUZ:
                 atualizarSensores()
                 seguirLinha()
                 agora = time.ticks_ms()
