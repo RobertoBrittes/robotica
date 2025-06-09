@@ -10,8 +10,6 @@ sensorDirNalinha = False;
 
 contador = 0
 
-HISTERESE = 5
-
 PORTA_SENSOR_ESQ = port.A
 PORTA_SENSOR_DIR = port.B
 PORTA_SENSOR_CRUZAMENTO = port.F
@@ -23,7 +21,7 @@ PORTA_MOTOR_DIR = port.D
 
 NUM_CRUZ = 4
 
-TEMPO_PARAR = 400
+TEMPO_PARAR = 1000
 
 LIMIAR = 30
 
