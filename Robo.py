@@ -1,6 +1,5 @@
 from hub import light_matrix, motion_sensor, port
 import force_sensor
-import color
 import color_sensor
 import motor
 import runloop
@@ -24,11 +23,11 @@ PORTA_MOTOR_DIR = port.D
 
 NUM_CRUZ = 4
 
-TEMPO_PARAR = 1000
+TEMPO_PARAR = 400
 
-LIMIAR = 40
+LIMIAR = 30
 
-VELOCIDADE = 200
+VELOCIDADE = 400
 VELOCIDADE_CURVA = VELOCIDADE
 
 TICTAC_TIME = 400
@@ -38,7 +37,6 @@ velocidadeFrente = VELOCIDADE
 
 #motor direita = D
 #motor esquerda = C invertido
-
 
 def frente(velocidade):
     motor.run(PORTA_MOTOR_DIR, velocidade)
@@ -73,7 +71,7 @@ def parar():
     motor.run(PORTA_MOTOR_ESQ, 0)
 
 def estouNaLinha(porta):
-    if color_sensor.reflection(porta) < LIMIAR + HISTERESE:
+    if color_sensor.reflection(porta) < LIMIAR:
         return False
     return True
 
@@ -107,13 +105,13 @@ def seguirLinha():
     # agora = time.ticks_ms()
     # ultimaAtt = agora
     # if agora >= (ultimaAtt + TICTAC_TIME):
-    #     ultimaAtt = agora
-    #     if estavaParaFrente:
-    #         velocidadeFrente+=50
-    #         if velocidadeFrente > 1110:
-    #             velocidadeFrente = 1110
-    #     else:
-    #         velocidadeFrente = VELOCIDADE
+    #    ultimaAtt = agora
+    #    if estavaParaFrente:
+    #        velocidadeFrente+=50
+    #        if velocidadeFrente > 1010:
+    #            velocidadeFrente = 1010
+    #    else:
+    #        velocidadeFrente = VELOCIDADE
 
 async def main():
     global contador
@@ -123,25 +121,28 @@ async def main():
 
     light_matrix.write(str(contador))
 
-    while contador < NUM_CRUZ:
-        atualizarSensores()
-        seguirLinha()
-        agora = time.ticks_ms()
-        if estouNaLinha(PORTA_SENSOR_CRUZAMENTO):
-            cont_cruzamento += 1
-            if cont_cruzamento > 3:
-                if agora >(ultimaAttCruz + TEMPO_ENTRE_CRUZ):
-                    contador += 1
-                    light_matrix.write(str(contador))
-                    ultimaAttCruz = agora
-        else:
-            cont_cruzamento = 0
-    agora = time.ticks_ms()
-    ultimaAtt = agora
-    while agora < ultimaAtt + TEMPO_PARAR:
-        agora = time.ticks_ms()
-        atualizarSensores()
-        seguirLinha()
-    parar()
+    while True:
+        if force_sensor.pressed(port.E):
+            contador = 0
+            while contador < NUM_CRUZ or force_sensor.pressed(port.E):
+                atualizarSensores()
+                seguirLinha()
+                agora = time.ticks_ms()
+                if estouNaLinha(PORTA_SENSOR_CRUZAMENTO):
+                    cont_cruzamento += 1
+                    if cont_cruzamento > 3:
+                        if agora >(ultimaAttCruz + TEMPO_ENTRE_CRUZ):
+                            contador += 1
+                            light_matrix.write(str(contador))
+                            ultimaAttCruz = agora
+                else:
+                    cont_cruzamento = 0
+            agora = time.ticks_ms()
+            ultimaAtt = agora
+            while agora < ultimaAtt + TEMPO_PARAR:
+                agora = time.ticks_ms()
+                atualizarSensores()
+                seguirLinha()
+            parar()
 
 runloop.run(main())
