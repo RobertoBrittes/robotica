@@ -1,0 +1,30 @@
+#define LED_VERMELHO 13
+#define LED_AMARELO 12
+#define LED_VERDE 11
+
+#define BOTAO 10
+
+void setup() {
+  pinMode(LED_VERMELHO, OUTPUT);
+  pinMode(LED_AMARELO, OUTPUT);
+  pinMode(LED_VERDE, OUTPUT);
+
+  pinMode(BOTAO, INPUT_PULLUP);
+
+  digitalWrite(LED_VERMELHO, LOW);
+  digitalWrite(LED_AMARELO, LOW);
+  digitalWrite(LED_VERDE, LOW); 
+}
+
+void loop() {
+  if(digitalRead(BOTAO)) {
+    digitalWrite(LED_VERMELHO, HIGH);
+    delay(3000);
+    digitalWrite(LED_VERMELHO, LOW);
+  } else {
+    digitalWrite(LED_VERMELHO, HIGH);
+    delay(1000);
+    digitalWrite(LED_VERMELHO, LOW);
+  }
+
+}
